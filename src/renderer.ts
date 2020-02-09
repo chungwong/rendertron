@@ -46,6 +46,16 @@ export class Renderer {
     }
 
     /**
+     * Remove data-react-helment attributes in all meta tags
+     */
+    function stripReactHelmetTags() {
+      const elements = document.querySelectorAll('meta[data-react-helmet="true"]');
+      for (const e of Array.from(elements)) {
+        e.removeAttribute('data-react-helmet');
+      }
+    }
+
+    /**
      * Injects a <base> tag which allows other resources to load. This
      * has no effect on serialised output, but allows it to verify render
      * quality.
@@ -161,6 +171,7 @@ export class Renderer {
 
     // Remove script & import tags.
     await page.evaluate(stripPage);
+    await page.evaluate(stripReactHelmetTags);
     // Inject <base> tag with the origin of the request (ie. no path).
     const parsedUrl = url.parse(requestUrl);
     await page.evaluate(
