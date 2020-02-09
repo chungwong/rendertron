@@ -79,6 +79,46 @@ export class Renderer {
 
     const page = await this.browser.newPage();
 
+    // https://developers.google.com/web/tools/puppeteer/articles/ssr#abort
+    // 1. Intercept network requests.
+    await page.setRequestInterception(true);
+
+    page.on('request', req => {
+      // 2. Ignore requests for resources that don't produce DOM
+      // (images, stylesheets, media).
+      const whitelist = ['document', 'script', 'xhr', 'fetch', 'stylesheet'];
+      if (!whitelist.includes(req.resourceType())) {
+        return req.abort();
+      }
+
+      if (req.url().indexOf('livechat') !== -1) {
+        return req.abort();
+      }
+
+      if (req.url().indexOf('googleadservices') !== -1) {
+        return req.abort();
+      }
+
+      if (req.url().indexOf('connect.facebook.net') !== -1) {
+        return req.abort();
+      }
+
+      if (req.url().indexOf('hotjar.com') !== -1) {
+        return req.abort();
+      }
+
+      if (req.url().indexOf('googletagmanager') !== -1) {
+        return req.abort();
+      }
+
+      if (req.url().indexOf('google-analytics.com') !== -1) {
+        return req.abort();
+      }
+
+      // 3. Pass through all other requests.
+      req.continue();
+    });
+
     // Page may reload when setting isMobile
     // https://github.com/GoogleChrome/puppeteer/blob/v1.10.0/docs/api.md#pagesetviewportviewport
     await page.setViewport({width: this.config.width, height: this.config.height, isMobile});
